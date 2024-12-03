@@ -7,9 +7,9 @@ function addProduct(product){
 }
 
 function removeProduct(productName){
-    const productIndex = inventory.findIndex((product) => product?.name === productName);
+    const productIndex = inventory.findIndex((prod) => prod?.name === productName);
     const product = inventory?.[productIndex];
-    inventory.splice(product, 1);
+    inventory.splice(productIndex, 1);
     // inventory = inventory.filter((product) => product?.name != productName);
     return product;
 }
