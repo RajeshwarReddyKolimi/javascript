@@ -28,12 +28,12 @@ fetchData();
 
 // function getProcessedData(url)  { 
 //     return downloadData(url) 
-//     .catch(e => {
-//         return downloadFallbackData(url) }
-//     )
-//     .then(v => { 
-//         return processDataInWorker(v) 
-//     })
+//         .catch(e => {
+//             return downloadFallbackData(url) }
+//         )
+//         .then(v => { 
+//             return processDataInWorker(v) 
+//         })
 // } 
 
 
@@ -45,10 +45,10 @@ fetchData();
 //         const data = await processDataInWorker(v);
 //         return data;
 //     }catch(e){
-//         const error = await downloadFallbackData(url);
-//         return e; 
+//         const v = await downloadFallbackData(url);
+//         const data = await processDataInWorker(v);
+//         return data; 
 //     }
-
 // }
 
 
@@ -113,4 +113,3 @@ delayedLowerCasePromise
     })
 
 
-    
