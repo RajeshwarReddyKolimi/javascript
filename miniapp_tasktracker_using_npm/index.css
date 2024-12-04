@@ -1,0 +1,83 @@
+*{
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+:root{
+    --color: black;
+    --background-color: white;
+    --button-color: rgba(30,62,98,1);
+    --task-bg-color: rgb(241, 253, 255);
+    --bg-color: #f6f5f2;
+}
+
+body{
+    background-color: var(--bg-color);
+}
+
+main{
+    max-width: 600px;
+    margin: auto;
+}
+form{
+    display: flex;
+    flex-direction: row;
+}
+
+input{
+    flex: 1;
+    padding: 1rem;
+    border: 1px solid var(--button-color);
+    width: 100%;
+    outline: none;
+    background-color: transparent;
+}
+
+input:focus{
+    outline: 1px solid var(--button-color);
+}
+
+button{
+    border-radius: 0.25rem;
+    font-size: 1rem; 
+    display: inline;
+    padding: 0.5rem 1rem;
+    background-color: var(--button-color);
+    color: white;
+    cursor: pointer;
+}
+
+h1, h2{
+    text-align: center;
+}
+
+form{
+
+} 
+
+.current-tasks-container, 
+.completed-tasks-container{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.task-item{
+    width: 100%;
+    background-color: var(--task-bg-color);
+    border: 1px solid var(--button-color);
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    align-items: center;
+    border-radius: 0.25rem;
+}
+
+.task-item > p{
+    margin: 0;
+    padding: 1rem;
+    /* background-color: blue; */
+    flex: 1;
+}
