@@ -1,27 +1,50 @@
-
 const form = document.querySelector("form");
 const input = document.querySelector("input");
 const currentTaskContainer = document.querySelector(".current-tasks-container")
 const completedTaskContainer = document.querySelector(".completed-tasks-container")
  
+const tasks = [];
+const cTasks = [];
 
-let currentTasks = getCurrentTasks(); 
-let completedTasks = getCompletedTasks(); 
 
+console.log("1");
 
-function getCurrentTasks(){
-    return [];
-    // return JSON?.parse(localStorage?.getItem("currentTasks")) || []
+class Storage{
+    constructor(name){
+        this.name = name;
+        // this.tasks = [];
+    }
+    get (){
+        // return this.tasks;
+        return JSON.parse(localStorage.getItem(this.name)) || [];
+    }
+    set(updatedTasks){
+        localStorage.setItem(this.name, JSON.stringify(updatedTasks));
+        // this.tasks = updatedTasks;
+    }
 }
 
-function getCompletedTasks(){ 
-    return [];
-    // return JSON?.parse(localStorage?.getItem("completedTasks")) || []
-}
+const s = new Storage("currentTasks");
+const cs = new Storage("completedTasks");
+
+
+
+// function getCurrentTasks(){
+//     return tasks;
+//     // return JSON?.parse(localStorage?.getItem("currentTasks")) || []
+// }
+
+// function getCompletedTasks(){ 
+//     return cTasks;
+//     // return JSON?.parse(localStorage?.getItem("completedTasks")) || []
+// }
 
 function addToCurrentTasks(task){
+    console.log("3");
 
-    currentTasks.push(task);
+    let temp = s.get();
+    temp.push(task);
+    s.set(temp);
     // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
     const taskItem = document.createElement("div");
     const taskDescription = document.createElement("p");
@@ -35,16 +58,23 @@ function addToCurrentTasks(task){
     taskItem.classList.add("task-item");
 
     deleteButton.addEventListener("click", () => {
+console.log("5");
+
         currentTaskContainer.removeChild(taskItem);
-        currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
+        s.set(s.get().filter((cTask) => cTask.id !== task.id));
+        // currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
+    
         // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
     })
     
     completeButton.addEventListener("click", () => {
+console.log("6");
+
         currentTaskContainer.removeChild(taskItem);
-        currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
+        s.set(s.get().filter((cTask) => cTask.id !== task.id));
+        // currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
         // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
-        addToCompletedTasks(task);
+        addToCompletedTasks(task, true);
     })
 
     taskItem.appendChild(taskDescription);
@@ -55,8 +85,13 @@ function addToCurrentTasks(task){
 }
 
 
-function addToCompletedTasks(task){
-    completedTasks.push(task);
+function addToCompletedTasks(task, save = false){
+    console.log("4");
+    if(save){
+        let temp = cs.get();
+        temp.push(task);
+        cs.set(temp);
+    }
     // localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
         
     const taskItem = document.createElement("div");
@@ -70,7 +105,9 @@ function addToCompletedTasks(task){
 
     deleteButton.addEventListener("click", () => {
         completedTaskContainer.removeChild(taskItem);
-        completedTasks = completedTasks.filter((cTask) => cTask.id !== task.id);
+
+        cs.set(cs.get().filter((cTask) => cTask.id !== task.id));
+        // completedTasks = completedTasks.filter((cTask) => cTask.id !== task.id);
         // localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
     })
     
@@ -83,23 +120,31 @@ function addToCompletedTasks(task){
 function removeFromCompletedTasks(task){
 }
 
+const currentTasks = s.get();
+console.log("Length", currentTasks.length);
+
 for(let i = 0 ; i < currentTasks.length; i++){
     addToCurrentTasks(currentTasks[i]);
 }
 
+const completedTasks = cs.get();
 for(let i = 0 ; i < completedTasks.length; i++){
-    addToCompletedTasks(completedTasks[i]);
+    addToCompletedTasks(completedTasks[i], false);
 }
 
 function createNewTask(value){
+console.log("2");
+
     const task = {
-        id: 1,//uuidv4(),
-        description: 'value',
+        id:1,// uuid.v4(),
+        description: value,
     }
     addToCurrentTasks(task);
 }
 
 form.addEventListener("submit", (e) => {
+console.log("0");
+
     e.preventDefault();
     createNewTask(input.value);
 })
