@@ -1,28 +1,32 @@
+import { v4 as uuidv4 } from "https://cdn.skypack.dev/uuid";
 
 const form = document.querySelector("form");
 const input = document.querySelector("input");
 const currentTaskContainer = document.querySelector(".current-tasks-container")
 const completedTaskContainer = document.querySelector(".completed-tasks-container")
- 
-
-let currentTasks = getCurrentTasks(); 
-let completedTasks = getCompletedTasks(); 
 
 
-function getCurrentTasks(){
-    return [];
-    // return JSON?.parse(localStorage?.getItem("currentTasks")) || []
+class TasksContainer{ 
+    constructor(name){
+        this.name = name;
+    }
+    get (){
+        return JSON.parse(localStorage.getItem(this.name)) || [];
+    }
+    set(updatedTasks){
+        localStorage.setItem(this.name, JSON.stringify(updatedTasks));
+    }
 }
 
-function getCompletedTasks(){ 
-    return [];
-    // return JSON?.parse(localStorage?.getItem("completedTasks")) || []
-}
+const currentTasks = new TasksContainer("currentTasks");
+const completedTasks = new TasksContainer("completedTasks");
 
-function addToCurrentTasks(task){
-
-    currentTasks.push(task);
-    // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
+function addToCurrentTasks(task, shouldAddToArray){
+    if(shouldAddToArray){
+        let temp = currentTasks.get();
+        temp.push(task);
+        currentTasks.set(temp);
+    }
     const taskItem = document.createElement("div");
     const taskDescription = document.createElement("p");
     const completeButton = document.createElement("button");
@@ -36,15 +40,13 @@ function addToCurrentTasks(task){
 
     deleteButton.addEventListener("click", () => {
         currentTaskContainer.removeChild(taskItem);
-        currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
-        // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
+        currentTasks.set(currentTasks.get().filter((cTask) => cTask.id !== task.id));
     })
     
     completeButton.addEventListener("click", () => {
         currentTaskContainer.removeChild(taskItem);
-        currentTasks = currentTasks.filter((cTask) => cTask.id !== task.id);
-        // localStorage.setItem("currentTasks", JSON.stringify(currentTasks));
-        addToCompletedTasks(task);
+        currentTasks.set(currentTasks.get().filter((cTask) => cTask.id !== task.id));
+        addToCompletedTasks(task, true);
     })
 
     taskItem.appendChild(taskDescription);
@@ -52,12 +54,16 @@ function addToCurrentTasks(task){
     taskItem.appendChild(deleteButton);
 
     currentTaskContainer.appendChild(taskItem);
+    input.value = "";
 }
 
 
-function addToCompletedTasks(task){
-    completedTasks.push(task);
-    // localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+function addToCompletedTasks(task, shouldAddToArray){
+    if(shouldAddToArray){
+        let temp = completedTasks.get();
+        temp.push(task);
+        completedTasks.set(temp);
+    }
         
     const taskItem = document.createElement("div");
     const taskDescription = document.createElement("p");
@@ -70,36 +76,37 @@ function addToCompletedTasks(task){
 
     deleteButton.addEventListener("click", () => {
         completedTaskContainer.removeChild(taskItem);
-        completedTasks = completedTasks.filter((cTask) => cTask.id !== task.id);
-        // localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+        completedTasks.set(completedTasks.get().filter((cTask) => cTask.id !== task.id));
     })
     
     taskItem.appendChild(taskDescription);
     taskItem.appendChild(deleteButton);
-
     completedTaskContainer.appendChild(taskItem);
 }
 
-function removeFromCompletedTasks(task){
+const currentTasksTemp = currentTasks.get();
+for(let i = 0 ; i < currentTasksTemp.length; i++){
+    addToCurrentTasks(currentTasksTemp[i], false);
 }
 
-for(let i = 0 ; i < currentTasks.length; i++){
-    addToCurrentTasks(currentTasks[i]);
-}
-
-for(let i = 0 ; i < completedTasks.length; i++){
-    addToCompletedTasks(completedTasks[i]);
+const completedTasksTemp = completedTasks.get();
+for(let i = 0 ; i < completedTasksTemp.length; i++){
+    addToCompletedTasks(completedTasksTemp[i], false);
 }
 
 function createNewTask(value){
     const task = {
-        id: 1,//uuidv4(),
-        description: 'value',
-    }
-    addToCurrentTasks(task);
+        id: uuidv4(), 
+        description: value,
+    } 
+    addToCurrentTasks(task, true);
 }
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
+    if(input.value.trim() == ""){
+        alert("Input cannot be empty");
+        return;
+    }
     createNewTask(input.value);
 })
