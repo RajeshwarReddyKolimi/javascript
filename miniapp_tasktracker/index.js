@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from "https://cdn.skypack.dev/uuid";
 
-const form = document.querySelector("form");
-const input = document.querySelector("input");
+// Varibles for HTML elements
+const taskForm = document.querySelector("form");
+const taskInput = document.querySelector("input");
 const currentTaskContainer = document.querySelector(".current-tasks-container")
 const completedTaskContainer = document.querySelector(".completed-tasks-container")
 
-
+// TasksContainer class to get and set localStorage
 class TasksContainer{ 
     constructor(name){
         this.name = name;
@@ -21,77 +22,93 @@ class TasksContainer{
 const currentTasks = new TasksContainer("currentTasks");
 const completedTasks = new TasksContainer("completedTasks");
 
-function addToCurrentTasks(task, shouldAddToArray){
-    if(shouldAddToArray){
-        let temp = currentTasks.get();
-        temp.push(task);
-        currentTasks.set(temp);
+// Adding tasks in localStorage on a refresh to HTML
+(() => {
+    let temp = currentTasks.get();
+    for(let i = 0 ; i < temp.length; i++)
+        addToCurrentTasksHTML(temp[i]);
+    
+    temp = completedTasks.get();
+    for(let i = 0 ; i < temp.length; i++){
+        addToCompletedTasksHTML(temp[i]);
     }
-    const taskItem = document.createElement("div");
-    const taskDescription = document.createElement("p");
-    const completeButton = document.createElement("button");
-    const deleteButton = document.createElement("button");
+})();
 
-    taskDescription.textContent = task.description;
-    deleteButton.textContent = "Delete";
-    completeButton.textContent = "Mark as completed";
-    
-    taskItem.classList.add("task-item");
-
-    deleteButton.addEventListener("click", () => {
-        currentTaskContainer.removeChild(taskItem);
-        currentTasks.set(currentTasks.get().filter((cTask) => cTask.id !== task.id));
-    })
-    
-    completeButton.addEventListener("click", () => {
-        currentTaskContainer.removeChild(taskItem);
-        currentTasks.set(currentTasks.get().filter((cTask) => cTask.id !== task.id));
-        addToCompletedTasks(task, true);
-    })
-
-    taskItem.appendChild(taskDescription);
-    taskItem.appendChild(completeButton);
-    taskItem.appendChild(deleteButton);
-
-    currentTaskContainer.appendChild(taskItem);
-    input.value = "";
+// Updates localStorage when a new task is created 
+function addToCurrentTasks(task){
+    let temp = currentTasks.get();
+    temp.push(task);
+    currentTasks.set(temp);
 }
 
+// Adds the task to HTML
+function addToCurrentTasksHTML(task){
+    const taskItem = createTaskHTML(task, true);
+    currentTaskContainer.appendChild(taskItem);
+}
 
-function addToCompletedTasks(task, shouldAddToArray){
-    if(shouldAddToArray){
-        let temp = completedTasks.get();
-        temp.push(task);
-        completedTasks.set(temp);
-    }
-        
-    const taskItem = document.createElement("div");
-    const taskDescription = document.createElement("p");
-    const deleteButton = document.createElement("button");
+// Updates localStorage when a task is marked as complete 
+function addToCompletedTasks(task){
+    let temp = completedTasks.get();
+    temp.push(task);
+    completedTasks.set(temp);
+}
 
-    taskDescription.textContent = task.description;
-    deleteButton.textContent = "Delete";
-    
-    taskItem.classList.add("task-item");
-
-    deleteButton.addEventListener("click", () => {
-        completedTaskContainer.removeChild(taskItem);
-        completedTasks.set(completedTasks.get().filter((cTask) => cTask.id !== task.id));
-    })
-    
-    taskItem.appendChild(taskDescription);
-    taskItem.appendChild(deleteButton);
+// Adds the task to HTML
+function addToCompletedTasksHTML(task){
+    const taskItem = createTaskHTML(task, false);
     completedTaskContainer.appendChild(taskItem);
 }
 
-const currentTasksTemp = currentTasks.get();
-for(let i = 0 ; i < currentTasksTemp.length; i++){
-    addToCurrentTasks(currentTasksTemp[i], false);
+// Delete the tasks from currentTasks
+function deleteFromCurrentTasks(task, taskItem){
+    currentTaskContainer.removeChild(taskItem);
+    currentTasks.set(currentTasks.get().filter((cTask) => cTask.id !== task.id));
 }
 
-const completedTasksTemp = completedTasks.get();
-for(let i = 0 ; i < completedTasksTemp.length; i++){
-    addToCompletedTasks(completedTasksTemp[i], false);
+function deleteFromCompletedTasks(task, taskItem){
+    completedTaskContainer.removeChild(taskItem);
+    completedTasks.set(completedTasks.get().filter((cTask) => cTask.id !== task.id));
+}
+
+function createTaskHTML(task, isCurrent){
+    
+    // Task Item
+    const taskItem = document.createElement("div");
+    taskItem.classList.add("task-item");
+
+    // Task Description
+    const taskDescription = document.createElement("p");
+    taskDescription.textContent = task.description;
+    taskItem.appendChild(taskDescription);
+    
+    // Mark as complete button
+    if(isCurrent){
+        const completeButton = document.createElement("button");
+        completeButton.textContent = "Mark as completed";
+        completeButton.addEventListener("click", () => {
+            deleteFromCurrentTasks(task, taskItem);
+            addToCompletedTasks(task);
+            addToCompletedTasksHTML(task);
+        })
+        taskItem.appendChild(completeButton);
+    }
+
+    // delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => {
+        if(isCurrent)
+            deleteFromCurrentTasks(task, taskItem)
+        else    
+            deleteFromCompletedTasks(task, taskItem);
+    })
+    taskItem.appendChild(deleteButton);
+
+    // Resetting input
+    taskInput.value = "";
+
+    return taskItem;
 }
 
 function createNewTask(value){
@@ -99,14 +116,15 @@ function createNewTask(value){
         id: uuidv4(), 
         description: value,
     } 
-    addToCurrentTasks(task, true);
+    addToCurrentTasks(task);
+    addToCurrentTasksHTML(task);
 }
 
-form.addEventListener("submit", (e) => {
+taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    if(input.value.trim() == ""){
+    if(taskInput.value.trim() == ""){
         alert("Input cannot be empty");
         return;
     }
-    createNewTask(input.value);
+    createNewTask(taskInput.value);
 })
